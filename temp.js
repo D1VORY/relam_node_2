@@ -12,6 +12,9 @@ const wild_type = 'TTCTTTCATGGGGAAGCAGATTTGGGTACCACCCAAGTATTGACTCACCCATCAACAACCG
 const base_rozpodil_array = objToArrayRozpodil({"0": 2, "1": 31, "2": 61, "3": 62, "4": 37, "5": 28, "6": 18, "7": 18, "8": 3})
 const wild_rozpodil_array = objToArrayRozpodil({'0': 28, '1': 59, '2': 61, '3': 40, '4': 31, '5': 18, '6': 19, '7': 4})
 
+a = {'0': 28, '1': 59, '2': 61, }
+b = {'0': 100,  '2': 200, }
+c = {'0': 128, '1': 59, '2': 261, }
 const TaskSchema = {
     name: "Task",
     properties: {
@@ -157,16 +160,31 @@ const realm_open = async () => {
     const dnks = realm.objects("DNK");
 
     const belorussian = dnks.filter(itemFilter => itemFilter.country_short === "BEL")
-
+    console.log(`harmingccc: ${JSON.stringify(belorussian)}`);
     //------------ harming
 
-    // const hammingRes = (dna) => belorussian.reduce(
-    //     (acc, item) => {
-    //         const hammingVal = hamming(item.dna, dna)
-    //         const count = !!acc[hammingVal] ? ++acc[hammingVal] : 1
-    //         return {[hammingVal]: count, ...acc}
-    //     }, {}
-    // )
+    const hammingRes = (dna, filtered_dnas) => filtered_dnas.reduce(
+        (acc, item) => {
+            const hammingVal = hamming(item.dna, dna)
+            const count = !!acc[hammingVal] ? ++acc[hammingVal] : 1
+            return {[hammingVal]: count, ...acc}
+        }, {}
+    )
+
+    const paired_distances = (filtered_dnas) => {
+        let results = {}
+        for (let i = 0; i < filtered_dnas.length; i++) {
+            const distances = hammingRes(filtered_dnas[i].dna, filtered_dnas.slice(i+1))
+            if (i === 0){
+                results = {...distances}
+            }else{
+                for (const property in distances) {
+                    results[property]
+                }
+            }
+
+        }
+    }
 
     // console.log(`harming: ${JSON.stringify(hammingRes(base_dna))}`);
 
