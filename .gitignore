@@ -2,3 +2,5 @@ node_modules/
 myrealm.management/
 mongodb-realm/
 .idea/
+myrealm
+myrealm.lock
