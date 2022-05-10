@@ -33,9 +33,9 @@ const DNKSchema = {
 
 async function load_from_json(rlm){
   var all_dnks_json = JSON.parse(fs.readFileSync('complete2.json', 'utf8'));
-   realm.write(() => {
+   rlm.write(() => {
      all_dnks_json.map((obj, i) => {
-        realm.create(DNKSchema.name, {
+        rlm.create(DNKSchema.name, {
           _id: i,
           ...obj
         });
@@ -48,6 +48,7 @@ const realm_open = async () => {
     path: "myrealm",
     schema: [TaskSchema, DNKSchema],
   })
+  //await load_from_json(realm)
   const dnks = realm.objects("DNK");
   console.log(`The lists of tasks are: ${dnks.map((task) => (JSON.stringify(task)))}`);
 }
