@@ -4,12 +4,22 @@ var fs = require('fs');
 var all_dnks_json = JSON.parse(fs.readFileSync('complete2.json', 'utf8'));
 
 
-const objToArrayRozpodil = (obj) => Object.keys(obj).reduce((acc, key) => [...acc, ...new Array(obj[key]).fill(key)], []);
+const objToArrayRozpodil = (obj) => Object.keys(obj).reduce((acc, key) => [...acc, ...new Array(obj[key]).fill(parseInt(key))], []);
 
 const base_dna = 'TTCTTTCATGGGGAAGCAGATTTGGGTACCACCCAAGTATTGACTCACCCATCAACAACCGCTATGTATTTCGTACATTACTGCCAGCCACCATGAATATTGTACGGTACCATAAATACTTGACCACCTGTAGTACATAAAAACCCAATCCACATCAAAACCCCCTCCCCATGCTTACAAGCAAGTACAGCAATCAACCCTCAACTATCACACATCAACTGCAACTCCAAAGCCACCCCTCACCCACTAGGATACCAACAAACCTACCCACCCTTAACAGTACATAGTACATAAAGCCATTTACCGTACATAGCACATTACAGTCAAATCCCTTCTCGCCCCCATGGATGACCCCCCTCAGATAGGGGTCCCTTGAC'
 const wild_type = 'TTCTTTCATGGGGAAGCAGATTTGGGTACCACCCAAGTATTGACTCACCCATCAACAACCGCTATGTATTTCGTACATTACTGCCAGCCACCATGAATATTGTACGGTACCATAAATACTTGACCACCTGTAGTACATAAAAACCCAATCCACATCAAAACCCCCTCCCCATGCTTACAAGCAAGTACAGCAATCAACCCTCAACTATCACACATCAACTGCAACTCCAAAGCCACCCCTCACCCACTAGGATACCAACAAACCTACCCACCCTTAACAGTACATAGTACATAAAGCCATTTACCGTACATAGCACATTACAGTCAAATCCCTTCTCGTCCCCATGGATGACCCCCCTCAGATAGGGGTCCCTTGAC'
 
-const base_rozpodil_array = objToArrayRozpodil({"0": 2, "1": 31, "2": 61, "3": 62, "4": 37, "5": 28, "6": 18, "7": 18, "8": 3})
+const base_rozpodil_array = objToArrayRozpodil({
+    "0": 2,
+    "1": 31,
+    "2": 61,
+    "3": 62,
+    "4": 37,
+    "5": 28,
+    "6": 18,
+    "7": 18,
+    "8": 3
+})
 const wild_rozpodil_array = objToArrayRozpodil({'0': 28, '1': 59, '2': 61, '3': 40, '4': 31, '5': 18, '6': 19, '7': 4})
 
 const TaskSchema = {
@@ -114,8 +124,7 @@ const realm_open = async () => {
         return sum;
     }
 
-    function mean(arr, n)
-    {
+    function mean(arr, n) {
         let sum = 0;
 
         for (let i = 0; i < n; i++)
@@ -124,14 +133,10 @@ const realm_open = async () => {
     }
 
 
-    function getStandardDeviation(arr) {
-        let sum = 0;
-        let n = arr.length
-        for (let i = 0; i < n; i++)
-            sum = sum + (arr[i] - mean(arr, n)) *
-                (arr[i] - mean(arr, n));
-
-        return Math.sqrt(sum / (n - 1));
+    function getStandardDeviation(array) {
+        const n = array.length
+        const mean = array.reduce((a, b) => a + b) / n
+        return Math.sqrt(array.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b) / n)
     }
 
     const mode = a =>
@@ -148,9 +153,8 @@ const realm_open = async () => {
     ;
 
 
-    function coefficientOfVariation(arr)
-    {
-        let n =  arr.length
+    function coefficientOfVariation(arr) {
+        let n = arr.length
         return (getStandardDeviation(arr, n) / mean(arr, n));
     }
 
@@ -224,6 +228,7 @@ const realm_open = async () => {
 
     console.log(coefficientOfVariation(base_rozpodil_array))
     console.log(coefficientOfVariation(wild_rozpodil_array))
+
 
 }
 
