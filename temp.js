@@ -17,7 +17,7 @@ const TaskSchema = {
 const DNKSchema = {
   name: 'DNK',
   properties: {
-    _id: 'objectId?',
+    _id: 'int',
     code: 'string?',
     country: 'string?',
     country_short: 'string?',
@@ -42,19 +42,19 @@ const DNKSchema = {
 const realm_open = async () => {
    let realm = await Realm.open({
     path: "myrealm",
-    schema: [TaskSchema],
+    schema: [TaskSchema, DNKSchema],
   })
 
 
-  let task1, task2;
-   realm.write(() => {
-     all_dnks_json.map((obj, i) => {
-        realm.create(DNKSchema.name, {
-          _id: i,
-          ...obj
-        });
-     })
-   })
+  // let task1, task2;
+  //  realm.write(() => {
+  //    all_dnks_json.map((obj, i) => {
+  //       realm.create(DNKSchema.name, {
+  //         _id: i,
+  //         ...obj
+  //       });
+  //    })
+  //  })
   //
   // realm.write(() => {
   //   task1 = realm.create("Task", {
@@ -71,7 +71,7 @@ const realm_open = async () => {
   // });
 
   const dnks = realm.objects("DNK");
-  console.log(`The lists of tasks are: ${tasks.map((task) => task.name)}`);
+  console.log(`The lists of tasks are: ${dnks.map((task) => (JSON.stringify(task)))}`);
 }
 
 realm_open()
