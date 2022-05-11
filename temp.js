@@ -179,16 +179,15 @@ const realm_open = async () => {
         let results = {}
         for (let i = 0; i < filtered_dnas.length; i++) {
             const distances = hammingRes(filtered_dnas[i].dna, filtered_dnas.slice(i+1))
-            if (i === 0){
-                results = {...distances}
-            }else{
-                for (const property in distances) {
-                    results[property]
-                }
+            for (const [key, value] of Object.entries(distances)){
+                results[key] = (key in results ? results[key] : 0) + value
             }
-
         }
+        return results
     }
+    console.log('=============================')
+    //console.log(hammingRes('AAAAA', [{'dna': 'AAACC'},{'dna': 'AAACA'},{'dna': 'AAACD'},{'dna': 'BAAAB'},]))
+    console.log(paired_distances(belorussian))
 
     // console.log(`harming: ${JSON.stringify(hammingRes(base_dna))}`);
 
