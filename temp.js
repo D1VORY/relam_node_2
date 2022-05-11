@@ -129,24 +129,10 @@ const realm_open = async () => {
         return sum / n;
     }
 
-    const wild_type_calculate = (filtered_dnas)=>{
-        let res = ""
-        for (let i = 0; i <= 377; ++i) {
-            let temp = ""
-            for (let j = 0; j <= filtered_dnas.length; ++j) {
-
-                temp += filtered_dnas[j]?.['dna'][i]
-            }
-            res += getMax(temp)
-        }
-        return res
-    }
-
-
     function getStandardDeviation(arr) {
         let sum = 0;
         let n = arr.length
-        console.log(arr)
+        //console.log(arr)
         for (let i = 0; i < n; i++)
             sum = sum + (arr[i] - mean(arr, n)) *
                 (arr[i] - mean(arr, n));
