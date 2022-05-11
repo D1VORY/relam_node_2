@@ -162,7 +162,6 @@ const realm_open = async () => {
 
     const dnks = realm.objects("DNK");
 
-    const data = dnks.filtered('country_short = "BEL"')
 
     //------------ harming
 
@@ -198,9 +197,7 @@ const realm_open = async () => {
         }
         return res
     }
-    wild_type = wild_type_calculate(data)
-    base_rozpodil_array = objToArrayRozpodil(hammingRes(base_dna,data))
-    wild_rozpodil_array = objToArrayRozpodil(hammingRes(wild_type,data))
+
 
     const log_rozpodil = (hamming_rozpodil) => {
         const rozpodil_array = objToArrayRozpodil(hamming_rozpodil)
@@ -244,8 +241,12 @@ const realm_open = async () => {
         console.log(JSON.stringify(rozpodil_paired))
         log_rozpodil(rozpodil_paired)
     }
-    let ukrainians = dnks.filtered('country_short = "UKR"')
-    log_all_data(ukrainians)
+
+    let data = dnks.filtered('country_short = "UKR" and code BEGINSWITH "ZA"')
+    wild_type = wild_type_calculate(data)
+    base_rozpodil_array = objToArrayRozpodil(hammingRes(base_dna,data))
+    wild_rozpodil_array = objToArrayRozpodil(hammingRes(wild_type,data))
+    log_all_data(data)
 
 }
 
