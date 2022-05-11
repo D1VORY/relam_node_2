@@ -1,7 +1,6 @@
 Realm = require('realm');
 var fs = require('fs');
 
-var all_dnks_json = JSON.parse(fs.readFileSync('complete2.json', 'utf8'));
 
 
 const objToArrayRozpodil = (obj) => Object.keys(obj).reduce((acc, key) => [...acc, ...new Array(obj[key]).fill(key)], []);
@@ -42,20 +41,25 @@ const DNKSchema = {
     primaryKey: '_id',
 };
 
-//const app = new Realm.App({id: realmAppId})
-// Realm.open({path: "myrealm", schema: [TaskSchema],}).then(
-//     (res) =>{kek = res}
-// );
 
-//const kek = Realm.open({path: "myrealm", schema: [TaskSchema],}).then(res => res);
-
+async function load_from_json(rlm){
+  var all_dnks_json = JSON.parse(fs.readFileSync('complete2.json', 'utf8'));
+   rlm.write(() => {
+     all_dnks_json.map((obj, i) => {
+        rlm.create(DNKSchema.name, {
+          _id: i,
+          ...obj
+        });
+     })
+   })
+}
 
 const realm_open = async () => {
     let realm = await Realm.open({
         path: "myrealm",
         schema: [TaskSchema, DNKSchema],
     })
-
+    //await load_from_json(realm)
 
     // let task1, task2;
     //  realm.write(() => {
