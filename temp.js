@@ -6,6 +6,7 @@ var fs = require('fs');
 const objToArrayRozpodil = (obj) => Object.keys(obj).reduce((acc, key) => [...acc, ...new Array(obj[key]).fill(parseInt(key))], []);
 
 const base_dna = 'TTCTTTCATGGGGAAGCAGATTTGGGTACCACCCAAGTATTGACTCACCCATCAACAACCGCTATGTATTTCGTACATTACTGCCAGCCACCATGAATATTGTACGGTACCATAAATACTTGACCACCTGTAGTACATAAAAACCCAATCCACATCAAAACCCCCTCCCCATGCTTACAAGCAAGTACAGCAATCAACCCTCAACTATCACACATCAACTGCAACTCCAAAGCCACCCCTCACCCACTAGGATACCAACAAACCTACCCACCCTTAACAGTACATAGTACATAAAGCCATTTACCGTACATAGCACATTACAGTCAAATCCCTTCTCGCCCCCATGGATGACCCCCCTCAGATAGGGGTCCCTTGAC'
+const base_dna_eva = 'TTCTTTCATGGGGAAGCAGATTTGGGTACCACCCAAGTATTGACTCACCCATCAACAACCGCTATGTATTTCGTACATTACTGCCAGCCACCATGAATATTGTACAGTACCATAAATACTTGACCACCTGTAGTACATAAAAACCCAATCCACATCAAAACCCTCCCCCCATGCTTACAAGCAAGTACAGCAATCAACCTTCAACTGTCACACATCAACTGCAACTCCAAAGCCACCCCTCACCCACTAGGATATCAACAAACCTACCCACCCTTAACAGTACATAGCACATAAAGCCATTTACCGTACATAGCACATTACAGTCAAATCCCTTCTCGTCCCCATGGATGACCCCCCTCAGATAGGGGTCCCTTGAC'
 let wild_type = ''
 
 let base_rozpodil_array = null//objToArrayRozpodil({"0": 2, "1": 31, "2": 61, "3": 62, "4": 37, "5": 28, "6": 18, "7": 18, "8": 3})
@@ -128,6 +129,19 @@ const realm_open = async () => {
         return sum / n;
     }
 
+    const wild_type_calculate = (filtered_dnas)=>{
+        let res = ""
+        for (let i = 0; i <= 377; ++i) {
+            let temp = ""
+            for (let j = 0; j <= filtered_dnas.length; ++j) {
+
+                temp += filtered_dnas[j]?.['dna'][i]
+            }
+            res += getMax(temp)
+        }
+        return res
+    }
+
 
     function getStandardDeviation(arr) {
         let sum = 0;
@@ -186,7 +200,6 @@ const realm_open = async () => {
     }
 
     const log_rozpodil = (hamming_rozpodil) => {
-        console.log('===================================')
         const rozpodil_array = objToArrayRozpodil(hamming_rozpodil)
         console.log(`Мат.сподів. ${calc_Expectation(rozpodil_array)}`)
         console.log(`Сер. кв выдхил ${getStandardDeviation(rozpodil_array)}`)
@@ -199,18 +212,30 @@ const realm_open = async () => {
 
     const log_all_data = (filtered) => {
         console.log('===================================')
-        console.log('Розподіл відносно базової rCRS\n')
+        console.log('Розподіл відносно базової rCRS')
         let rozpodil_rcrs = hammingRes(base_dna, filtered)
         console.log(JSON.stringify(rozpodil_rcrs))
         log_rozpodil(rozpodil_rcrs)
 
-        console.log('_____________________________________________________________________')
         console.log('===================================')
-        console.log('Розподіл відносно базової RSRS \n')
-        let rozpodil_rsrs = hammingRes(base_dna_rsrs, filtered)
+        console.log('Розподіл відносно базової RSRS')
+        let rozpodil_rsrs = hammingRes(base_dna_eva, filtered)
         console.log(JSON.stringify(rozpodil_rsrs))
-        log_rozpodil(rozpodil_rcrs)
+        log_rozpodil(rozpodil_rsrs)
 
+
+        console.log('===================================')
+        console.log('Розподіл відносно дикого типу')
+        let wild_type = wild_type_calculate(filtered)
+        let rozpodil_wild_type = hammingRes(wild_type, filtered)
+        console.log(JSON.stringify(rozpodil_wild_type))
+        log_rozpodil(rozpodil_wild_type)
+
+        console.log('===================================')
+        console.log('Розподіл відносно попарних')
+        let rozpodil_paired = paired_distances(filtered)
+        console.log(JSON.stringify(rozpodil_paired))
+        log_rozpodil(rozpodil_paired)
     }
 
     log_all_data(belorussian)
@@ -226,18 +251,7 @@ const realm_open = async () => {
 
 
     //
-    const wild_type_calculate = (filtered_dnas)=>{
-        let res = ""
-        for (let i = 0; i <= 377; ++i) {
-            let temp = ""
-            for (let j = 0; j <= filtered_dnas.length; ++j) {
 
-                temp += filtered_dnas[j]?.['dna'][i]
-            }
-            res += getMax(temp)
-        }
-        return res
-    }
     wild_type = wild_type_calculate(belorussian)
     base_rozpodil_array = hammingRes(objToArrayRozpodil(base_dna,belorussian))
     wild_rozpodil_array = hammingRes(objToArrayRozpodil(wild_type,belorussian))
