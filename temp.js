@@ -6,10 +6,10 @@ var fs = require('fs');
 const objToArrayRozpodil = (obj) => Object.keys(obj).reduce((acc, key) => [...acc, ...new Array(obj[key]).fill(parseInt(key))], []);
 
 const base_dna = 'TTCTTTCATGGGGAAGCAGATTTGGGTACCACCCAAGTATTGACTCACCCATCAACAACCGCTATGTATTTCGTACATTACTGCCAGCCACCATGAATATTGTACGGTACCATAAATACTTGACCACCTGTAGTACATAAAAACCCAATCCACATCAAAACCCCCTCCCCATGCTTACAAGCAAGTACAGCAATCAACCCTCAACTATCACACATCAACTGCAACTCCAAAGCCACCCCTCACCCACTAGGATACCAACAAACCTACCCACCCTTAACAGTACATAGTACATAAAGCCATTTACCGTACATAGCACATTACAGTCAAATCCCTTCTCGCCCCCATGGATGACCCCCCTCAGATAGGGGTCCCTTGAC'
-const wild_type = 'TTCTTTCATGGGGAAGCAGATTTGGGTACCACCCAAGTATTGACTCACCCATCAACAACCGCTATGTATTTCGTACATTACTGCCAGCCACCATGAATATTGTACGGTACCATAAATACTTGACCACCTGTAGTACATAAAAACCCAATCCACATCAAAACCCCCTCCCCATGCTTACAAGCAAGTACAGCAATCAACCCTCAACTATCACACATCAACTGCAACTCCAAAGCCACCCCTCACCCACTAGGATACCAACAAACCTACCCACCCTTAACAGTACATAGTACATAAAGCCATTTACCGTACATAGCACATTACAGTCAAATCCCTTCTCGTCCCCATGGATGACCCCCCTCAGATAGGGGTCCCTTGAC'
+let wild_type = ''
 
-const base_rozpodil_array = objToArrayRozpodil({"0": 2, "1": 31, "2": 61, "3": 62, "4": 37, "5": 28, "6": 18, "7": 18, "8": 3})
-const wild_rozpodil_array = objToArrayRozpodil({'0': 28, '1': 59, '2': 61, '3': 40, '4': 31, '5': 18, '6': 19, '7': 4})
+let base_rozpodil_array = null//objToArrayRozpodil({"0": 2, "1": 31, "2": 61, "3": 62, "4": 37, "5": 28, "6": 18, "7": 18, "8": 3})
+let wild_rozpodil_array = null //objToArrayRozpodil({'0': 28, '1': 59, '2': 61, '3': 40, '4': 31, '5': 18, '6': 19, '7': 4})
 
 
 const TaskSchema = {
@@ -226,20 +226,27 @@ const realm_open = async () => {
 
 
     //
-    // let res = ""
-    // for (let i = 0; i <= 377; ++i) {
-    //     let temp = ""
-    //     for (let j = 0; j <= belorussian.length; ++j) {
-    //
-    //         temp += belorussian[j]?.['dna'][i]
-    //     }
-    //     res += getMax(temp)
-    // }
-    //
-    // console.log(res)
+    const wild_type_calculate = (filtered_dnas)=>{
+        let res = ""
+        for (let i = 0; i <= 377; ++i) {
+            let temp = ""
+            for (let j = 0; j <= filtered_dnas.length; ++j) {
+
+                temp += filtered_dnas[j]?.['dna'][i]
+            }
+            res += getMax(temp)
+        }
+        return res
+    }
+    wild_type = wild_type_calculate(belorussian)
+    base_rozpodil_array = hammingRes(objToArrayRozpodil(base_dna,belorussian))
+    wild_rozpodil_array = hammingRes(objToArrayRozpodil(wild_type,belorussian))
 
 
-    //---------- hamming Wild
+
+
+
+      //---------- hamming Wild
 
     // console.log(hammingRes(wild_type))
 
