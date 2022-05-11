@@ -238,10 +238,12 @@ const realm_open = async () => {
         log_rozpodil(rozpodil_paired)
     }
 
-    let data = dnks.filtered('country_short = "UKR" and code BEGINSWITH "ZA"')
+    let data = dnks.filtered('code BEGINSWITH "ZA" or code BEGINSWITH "ST" or code BEGINSWITH "IF"')
+
     wild_type = wild_type_calculate(data)
-    base_rozpodil_array = objToArrayRozpodil(hammingRes(base_dna,data))
+
     wild_rozpodil_array = objToArrayRozpodil(hammingRes(wild_type,data))
+
     log_all_data(data)
 
 }
