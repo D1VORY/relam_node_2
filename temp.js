@@ -1,7 +1,6 @@
 Realm = require('realm');
 var fs = require('fs');
 
-var all_dnks_json = JSON.parse(fs.readFileSync('complete2.json', 'utf8'));
 
 
 const objToArrayRozpodil = (obj) => Object.keys(obj).reduce((acc, key) => [...acc, ...new Array(obj[key]).fill(parseInt(key))], []);
@@ -22,6 +21,9 @@ const base_rozpodil_array = objToArrayRozpodil({
 })
 const wild_rozpodil_array = objToArrayRozpodil({'0': 28, '1': 59, '2': 61, '3': 40, '4': 31, '5': 18, '6': 19, '7': 4})
 
+a = {'0': 28, '1': 59, '2': 61, }
+b = {'0': 100,  '2': 200, }
+c = {'0': 128, '1': 59, '2': 261, }
 const TaskSchema = {
     name: "Task",
     properties: {
@@ -49,20 +51,25 @@ const DNKSchema = {
     primaryKey: '_id',
 };
 
-//const app = new Realm.App({id: realmAppId})
-// Realm.open({path: "myrealm", schema: [TaskSchema],}).then(
-//     (res) =>{kek = res}
-// );
 
-//const kek = Realm.open({path: "myrealm", schema: [TaskSchema],}).then(res => res);
-
+async function load_from_json(rlm){
+  var all_dnks_json = JSON.parse(fs.readFileSync('complete2.json', 'utf8'));
+   rlm.write(() => {
+     all_dnks_json.map((obj, i) => {
+        rlm.create(DNKSchema.name, {
+          _id: i,
+          ...obj
+        });
+     })
+   })
+}
 
 const realm_open = async () => {
     let realm = await Realm.open({
         path: "myrealm",
         schema: [TaskSchema, DNKSchema],
     })
-
+    //await load_from_json(realm)
 
     // let task1, task2;
     //  realm.write(() => {
@@ -161,16 +168,30 @@ const realm_open = async () => {
     const dnks = realm.objects("DNK");
 
     const belorussian = dnks.filter(itemFilter => itemFilter.country_short === "BEL")
-
+    console.log(`harmingccc: ${JSON.stringify(belorussian)}`);
     //------------ harming
 
-    // const hammingRes = (dna) => belorussian.reduce(
-    //     (acc, item) => {
-    //         const hammingVal = hamming(item.dna, dna)
-    //         const count = !!acc[hammingVal] ? ++acc[hammingVal] : 1
-    //         return {[hammingVal]: count, ...acc}
-    //     }, {}
-    // )
+    const hammingRes = (dna, filtered_dnas) => filtered_dnas.reduce(
+        (acc, item) => {
+            const hammingVal = hamming(item.dna, dna)
+            const count = !!acc[hammingVal] ? ++acc[hammingVal] : 1
+            return {[hammingVal]: count, ...acc}
+        }, {}
+    )
+
+    const paired_distances = (filtered_dnas) => {
+        let results = {}
+        for (let i = 0; i < filtered_dnas.length; i++) {
+            const distances = hammingRes(filtered_dnas[i].dna, filtered_dnas.slice(i+1))
+            for (const [key, value] of Object.entries(distances)){
+                results[key] = (key in results ? results[key] : 0) + value
+            }
+        }
+        return results
+    }
+    console.log('=============================')
+    //console.log(hammingRes('AAAAA', [{'dna': 'AAACC'},{'dna': 'AAACA'},{'dna': 'AAACD'},{'dna': 'BAAAB'},]))
+    console.log(paired_distances(belorussian))
 
     // console.log(`harming: ${JSON.stringify(hammingRes(base_dna))}`);
 
