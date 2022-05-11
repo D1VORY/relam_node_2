@@ -207,8 +207,9 @@ const realm_open = async () => {
         console.log(`Мат.сподів. ${calc_Expectation(rozpodil_array)}`)
         console.log(`Сер. кв выдхил ${getStandardDeviation(rozpodil_array)}`)
         console.log(`мода ${mode(rozpodil_array)}`)
-        console.log(`min ${Math.min(...rozpodil_array)}`)
-        console.log(`max ${Math.max(...rozpodil_array)}`)
+        //console.log(`LENGTH: ${rozpodil_array.length}`)
+        // console.log(`min ${Math.min(...rozpodil_array)}`)
+        // console.log(`max ${Math.max(...rozpodil_array)}`)
         console.log(`Coefficient of variation ${coefficientOfVariation(rozpodil_array)}`)
     }
 
@@ -239,58 +240,8 @@ const realm_open = async () => {
         console.log(JSON.stringify(rozpodil_paired))
         log_rozpodil(rozpodil_paired)
     }
-
-    log_all_data(data)
-
-
-    //console.log(hammingRes('AAAAA', [{'dna': 'AAACC'},{'dna': 'AAACA'},{'dna': 'AAACD'},{'dna': 'BAAAB'},]))
-    //console.log(paired_distances(data))
-
-    // console.log(`harming: ${JSON.stringify(hammingRes(base_dna))}`);
-
-
-
-
-
-
-
-
-      //---------- hamming Wild
-
-    // console.log(hammingRes(wild_type))
-
-
-    //---------- mat spodivannya
-
-
-    // console.log(objToArrayRozpodil({'0': 28, '1': 59, '2': 61, '3': 40, '4': 31, '5': 18, '6': 19, '7': 4}))
-    // // base
-    // console.log(calc_Expectation(base_rozpodil_array))
-    // // wild
-    // console.log(calc_Expectation(wild_rozpodil_array))
-    //
-    //
-    // //----------- seredne kvadratychne
-    //
-    // console.log(getStandardDeviation(base_rozpodil_array))
-    // console.log(getStandardDeviation(wild_rozpodil_array))
-
-
-    //----------- mode
-    //
-    // console.log(mode(base_rozpodil_array))
-    // console.log(mode(wild_rozpodil_array))
-    //
-    //
-    // //---------- max - min
-    // console.log(Math.max(...base_rozpodil_array))
-    // console.log(Math.min(...wild_rozpodil_array))
-    //
-    //
-    // //--------- Coefficient of variation
-    //
-    // console.log(coefficientOfVariation(base_rozpodil_array))
-    // console.log(coefficientOfVariation(wild_rozpodil_array))
+    let ukrainians = dnks.filtered('country_short = "UKR"')
+    log_all_data(ukrainians)
 
 }
 
