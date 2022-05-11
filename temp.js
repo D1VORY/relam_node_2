@@ -185,6 +185,23 @@ const realm_open = async () => {
         return results
     }
 
+    //----------- wild type
+    const wild_type_calculate = (filtered_dnas)=>{
+        let res = ""
+        for (let i = 0; i <= 377; ++i) {
+            let temp = ""
+            for (let j = 0; j <= filtered_dnas.length; ++j) {
+
+                temp += filtered_dnas[j]?.['dna'][i]
+            }
+            res += getMax(temp)
+        }
+        return res
+    }
+    wild_type = wild_type_calculate(belorussian)
+    base_rozpodil_array = objToArrayRozpodil(hammingRes(base_dna,belorussian))
+    wild_rozpodil_array = objToArrayRozpodil(hammingRes(wild_type,belorussian))
+
     const log_rozpodil = (hamming_rozpodil) => {
         console.log('===================================')
         const rozpodil_array = objToArrayRozpodil(hamming_rozpodil)
@@ -222,25 +239,7 @@ const realm_open = async () => {
     // console.log(`harming: ${JSON.stringify(hammingRes(base_dna))}`);
 
 
-    //----------- wild type
 
-
-    //
-    const wild_type_calculate = (filtered_dnas)=>{
-        let res = ""
-        for (let i = 0; i <= 377; ++i) {
-            let temp = ""
-            for (let j = 0; j <= filtered_dnas.length; ++j) {
-
-                temp += filtered_dnas[j]?.['dna'][i]
-            }
-            res += getMax(temp)
-        }
-        return res
-    }
-    wild_type = wild_type_calculate(belorussian)
-    base_rozpodil_array = hammingRes(objToArrayRozpodil(base_dna,belorussian))
-    wild_rozpodil_array = hammingRes(objToArrayRozpodil(wild_type,belorussian))
 
 
 
