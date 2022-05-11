@@ -162,8 +162,8 @@ const realm_open = async () => {
 
     const dnks = realm.objects("DNK");
 
-    const belorussian = dnks.filter(itemFilter => itemFilter.country_short === "BEL")
-    console.log(`harmingccc: ${JSON.stringify(belorussian)}`);
+    const data = dnks.filtered('country_short = "BEL"')
+
     //------------ harming
 
     const hammingRes = (dna, filtered_dnas) => filtered_dnas.reduce(
@@ -198,15 +198,14 @@ const realm_open = async () => {
         }
         return res
     }
-    wild_type = wild_type_calculate(belorussian)
-    base_rozpodil_array = objToArrayRozpodil(hammingRes(base_dna,belorussian))
-    wild_rozpodil_array = objToArrayRozpodil(hammingRes(wild_type,belorussian))
+    wild_type = wild_type_calculate(data)
+    base_rozpodil_array = objToArrayRozpodil(hammingRes(base_dna,data))
+    wild_rozpodil_array = objToArrayRozpodil(hammingRes(wild_type,data))
 
     const log_rozpodil = (hamming_rozpodil) => {
         const rozpodil_array = objToArrayRozpodil(hamming_rozpodil)
         console.log(`Мат.сподів. ${calc_Expectation(rozpodil_array)}`)
         console.log(`Сер. кв выдхил ${getStandardDeviation(rozpodil_array)}`)
-        console.log(`мода ${mode(rozpodil_array)}`)
         console.log(`мода ${mode(rozpodil_array)}`)
         console.log(`min ${Math.min(...rozpodil_array)}`)
         console.log(`max ${Math.max(...rozpodil_array)}`)
@@ -241,11 +240,11 @@ const realm_open = async () => {
         log_rozpodil(rozpodil_paired)
     }
 
-    log_all_data(belorussian)
+    log_all_data(data)
 
 
     //console.log(hammingRes('AAAAA', [{'dna': 'AAACC'},{'dna': 'AAACA'},{'dna': 'AAACD'},{'dna': 'BAAAB'},]))
-    //console.log(paired_distances(belorussian))
+    //console.log(paired_distances(data))
 
     // console.log(`harming: ${JSON.stringify(hammingRes(base_dna))}`);
 
