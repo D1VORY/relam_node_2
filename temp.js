@@ -3,7 +3,7 @@ var fs = require('fs');
 
 
 
-const objToArrayRozpodil = (obj) => Object.keys(obj).reduce((acc, key) => [...acc, ...new Array(obj[key]).fill(key)], []);
+const objToArrayRozpodil = (obj) => Object.keys(obj).reduce((acc, key) => [...acc, ...new Array(obj[key]).fill(parseInt(key))], []);
 
 const base_dna = 'TTCTTTCATGGGGAAGCAGATTTGGGTACCACCCAAGTATTGACTCACCCATCAACAACCGCTATGTATTTCGTACATTACTGCCAGCCACCATGAATATTGTACGGTACCATAAATACTTGACCACCTGTAGTACATAAAAACCCAATCCACATCAAAACCCCCTCCCCATGCTTACAAGCAAGTACAGCAATCAACCCTCAACTATCACACATCAACTGCAACTCCAAAGCCACCCCTCACCCACTAGGATACCAACAAACCTACCCACCCTTAACAGTACATAGTACATAAAGCCATTTACCGTACATAGCACATTACAGTCAAATCCCTTCTCGCCCCCATGGATGACCCCCCTCAGATAGGGGTCCCTTGAC'
 const wild_type = 'TTCTTTCATGGGGAAGCAGATTTGGGTACCACCCAAGTATTGACTCACCCATCAACAACCGCTATGTATTTCGTACATTACTGCCAGCCACCATGAATATTGTACGGTACCATAAATACTTGACCACCTGTAGTACATAAAAACCCAATCCACATCAAAACCCCCTCCCCATGCTTACAAGCAAGTACAGCAATCAACCCTCAACTATCACACATCAACTGCAACTCCAAAGCCACCCCTCACCCACTAGGATACCAACAAACCTACCCACCCTTAACAGTACATAGTACATAAAGCCATTTACCGTACATAGCACATTACAGTCAAATCCCTTCTCGTCCCCATGGATGACCCCCCTCAGATAGGGGTCCCTTGAC'
@@ -11,9 +11,7 @@ const wild_type = 'TTCTTTCATGGGGAAGCAGATTTGGGTACCACCCAAGTATTGACTCACCCATCAACAACCG
 const base_rozpodil_array = objToArrayRozpodil({"0": 2, "1": 31, "2": 61, "3": 62, "4": 37, "5": 28, "6": 18, "7": 18, "8": 3})
 const wild_rozpodil_array = objToArrayRozpodil({'0': 28, '1': 59, '2': 61, '3': 40, '4': 31, '5': 18, '6': 19, '7': 4})
 
-a = {'0': 28, '1': 59, '2': 61, }
-b = {'0': 100,  '2': 200, }
-c = {'0': 128, '1': 59, '2': 261, }
+
 const TaskSchema = {
     name: "Task",
     properties: {
@@ -134,6 +132,7 @@ const realm_open = async () => {
     function getStandardDeviation(arr) {
         let sum = 0;
         let n = arr.length
+        console.log(arr)
         for (let i = 0; i < n; i++)
             sum = sum + (arr[i] - mean(arr, n)) *
                 (arr[i] - mean(arr, n));
@@ -185,9 +184,40 @@ const realm_open = async () => {
         }
         return results
     }
-    console.log('=============================')
+
+    const log_rozpodil = (hamming_rozpodil) => {
+        console.log('===================================')
+        const rozpodil_array = objToArrayRozpodil(hamming_rozpodil)
+        console.log(`Мат.сподів. ${calc_Expectation(rozpodil_array)}`)
+        console.log(`Сер. кв выдхил ${getStandardDeviation(rozpodil_array)}`)
+        console.log(`мода ${mode(rozpodil_array)}`)
+        console.log(`мода ${mode(rozpodil_array)}`)
+        console.log(`min ${Math.min(...rozpodil_array)}`)
+        console.log(`max ${Math.max(...rozpodil_array)}`)
+        console.log(`Coefficient of variation ${coefficientOfVariation(rozpodil_array)}`)
+    }
+
+    const log_all_data = (filtered) => {
+        console.log('===================================')
+        console.log('Розподіл відносно базової rCRS\n')
+        let rozpodil_rcrs = hammingRes(base_dna, filtered)
+        console.log(JSON.stringify(rozpodil_rcrs))
+        log_rozpodil(rozpodil_rcrs)
+
+        console.log('_____________________________________________________________________')
+        console.log('===================================')
+        console.log('Розподіл відносно базової RSRS \n')
+        let rozpodil_rsrs = hammingRes(base_dna_rsrs, filtered)
+        console.log(JSON.stringify(rozpodil_rsrs))
+        log_rozpodil(rozpodil_rcrs)
+
+    }
+
+    log_all_data(belorussian)
+
+
     //console.log(hammingRes('AAAAA', [{'dna': 'AAACC'},{'dna': 'AAACA'},{'dna': 'AAACD'},{'dna': 'BAAAB'},]))
-    console.log(paired_distances(belorussian))
+    //console.log(paired_distances(belorussian))
 
     // console.log(`harming: ${JSON.stringify(hammingRes(base_dna))}`);
 
@@ -217,34 +247,34 @@ const realm_open = async () => {
     //---------- mat spodivannya
 
 
-    console.log(objToArrayRozpodil({'0': 28, '1': 59, '2': 61, '3': 40, '4': 31, '5': 18, '6': 19, '7': 4}))
-    // base
-    console.log(calc_Expectation(base_rozpodil_array))
-    // wild
-    console.log(calc_Expectation(wild_rozpodil_array))
-
-
-    //----------- seredne kvadratychne
-
-    console.log(getStandardDeviation(base_rozpodil_array))
-    console.log(getStandardDeviation(wild_rozpodil_array))
+    // console.log(objToArrayRozpodil({'0': 28, '1': 59, '2': 61, '3': 40, '4': 31, '5': 18, '6': 19, '7': 4}))
+    // // base
+    // console.log(calc_Expectation(base_rozpodil_array))
+    // // wild
+    // console.log(calc_Expectation(wild_rozpodil_array))
+    //
+    //
+    // //----------- seredne kvadratychne
+    //
+    // console.log(getStandardDeviation(base_rozpodil_array))
+    // console.log(getStandardDeviation(wild_rozpodil_array))
 
 
     //----------- mode
-
-    console.log(mode(base_rozpodil_array))
-    console.log(mode(wild_rozpodil_array))
-
-
-    //---------- max - min
-    console.log(Math.max(...base_rozpodil_array))
-    console.log(Math.min(...wild_rozpodil_array))
-
-
-    //--------- Coefficient of variation
-
-    console.log(coefficientOfVariation(base_rozpodil_array))
-    console.log(coefficientOfVariation(wild_rozpodil_array))
+    //
+    // console.log(mode(base_rozpodil_array))
+    // console.log(mode(wild_rozpodil_array))
+    //
+    //
+    // //---------- max - min
+    // console.log(Math.max(...base_rozpodil_array))
+    // console.log(Math.min(...wild_rozpodil_array))
+    //
+    //
+    // //--------- Coefficient of variation
+    //
+    // console.log(coefficientOfVariation(base_rozpodil_array))
+    // console.log(coefficientOfVariation(wild_rozpodil_array))
 
 }
 
