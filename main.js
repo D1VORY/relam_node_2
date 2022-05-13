@@ -8,7 +8,6 @@ const objToArrayRozpodil = (obj) => Object.keys(obj).reduce((acc, key) => [...ac
 
 const base_dna = 'TTCTTTCATGGGGAAGCAGATTTGGGTACCACCCAAGTATTGACTCACCCATCAACAACCGCTATGTATTTCGTACATTACTGCCAGCCACCATGAATATTGTACGGTACCATAAATACTTGACCACCTGTAGTACATAAAAACCCAATCCACATCAAAACCCCCTCCCCATGCTTACAAGCAAGTACAGCAATCAACCCTCAACTATCACACATCAACTGCAACTCCAAAGCCACCCCTCACCCACTAGGATACCAACAAACCTACCCACCCTTAACAGTACATAGTACATAAAGCCATTTACCGTACATAGCACATTACAGTCAAATCCCTTCTCGCCCCCATGGATGACCCCCCTCAGATAGGGGTCCCTTGAC'
 const base_dna_eva = 'TTCTTTCATGGGGAAGCAGATTTGGGTACCACCCAAGTATTGACTCACCCATCAACAACCGCTATGTATTTCGTACATTACTGCCAGCCACCATGAATATTGTACAGTACCATAAATACTTGACCACCTGTAGTACATAAAAACCCAATCCACATCAAAACCCTCCCCCCATGCTTACAAGCAAGTACAGCAATCAACCTTCAACTGTCACACATCAACTGCAACTCCAAAGCCACCCCTCACCCACTAGGATATCAACAAACCTACCCACCCTTAACAGTACATAGCACATAAAGCCATTTACCGTACATAGCACATTACAGTCAAATCCCTTCTCGTCCCCATGGATGACCCCCCTCAGATAGGGGTCCCTTGAC'
-let wild_type = ''
 
 
 const DNKSchema = {
@@ -64,23 +63,6 @@ const ResultSchema = {
     },
     primaryKey: '_id',
 };
-
-
-//
-// const DistributionSchema = {
-//     name: 'Distribution',
-//     properties: {
-//         _id: 'int',
-//         task: 'string?',
-//         distribution: 'object?',
-//         result: {
-//             ref: ResultSchema,
-//             foreign_key: "_id",
-//             is_list: false
-//         }
-//     },
-//     primaryKey: '_id',
-// };
 
 async function load_from_json(rlm){
   var all_dnks_json = JSON.parse(fs.readFileSync('complete2.json', 'utf8'));
@@ -177,9 +159,6 @@ const realm_open = async () => {
         let n =  arr.length
         return (getStandardDeviation(arr, n) / mean(arr, n));
     }
-
-    const dnks = realm.objects("DNK");
-
 
     //------------ harming
 
@@ -285,6 +264,7 @@ const realm_open = async () => {
           main_task = realm.create(MainTask.name, {_id: bson.ObjectId(), name: main_task_name, results: results})
         });
     }
+    const dnks = realm.objects("DNK");
     //1
     var startTime = performance.now()
     let data = dnks.filtered('country_short = "UKR"')
