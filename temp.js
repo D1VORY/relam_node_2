@@ -1,6 +1,7 @@
 Realm = require('realm');
+bson = require('bson')
 var fs = require('fs');
-
+const { performance } = require('perf_hooks');
 
 
 const objToArrayRozpodil = (obj) => Object.keys(obj).reduce((acc, key) => [...acc, ...new Array(obj[key]).fill(parseInt(key))], []);
@@ -9,19 +10,6 @@ const base_dna = 'TTCTTTCATGGGGAAGCAGATTTGGGTACCACCCAAGTATTGACTCACCCATCAACAACCGC
 const base_dna_eva = 'TTCTTTCATGGGGAAGCAGATTTGGGTACCACCCAAGTATTGACTCACCCATCAACAACCGCTATGTATTTCGTACATTACTGCCAGCCACCATGAATATTGTACAGTACCATAAATACTTGACCACCTGTAGTACATAAAAACCCAATCCACATCAAAACCCTCCCCCCATGCTTACAAGCAAGTACAGCAATCAACCTTCAACTGTCACACATCAACTGCAACTCCAAAGCCACCCCTCACCCACTAGGATATCAACAAACCTACCCACCCTTAACAGTACATAGCACATAAAGCCATTTACCGTACATAGCACATTACAGTCAAATCCCTTCTCGTCCCCATGGATGACCCCCCTCAGATAGGGGTCCCTTGAC'
 let wild_type = ''
 
-let base_rozpodil_array = null//objToArrayRozpodil({"0": 2, "1": 31, "2": 61, "3": 62, "4": 37, "5": 28, "6": 18, "7": 18, "8": 3})
-let wild_rozpodil_array = null //objToArrayRozpodil({'0': 28, '1': 59, '2': 61, '3': 40, '4': 31, '5': 18, '6': 19, '7': 4})
-
-
-const TaskSchema = {
-    name: "Task",
-    properties: {
-        _id: "int",
-        name: "string",
-        status: "string?",
-    },
-    primaryKey: "_id",
-};
 
 const DNKSchema = {
     name: 'DNK',
@@ -41,6 +29,59 @@ const DNKSchema = {
 };
 
 
+const MainTask = {
+    name: 'MainTask',
+    properties: {
+        _id: 'objectId',
+        name: 'string?',
+        results: 'Result[]'
+    },
+    primaryKey: '_id',
+}
+
+const DistributionValueSchema = {
+    name: 'DistributionValue',
+    properties: {
+        _id: 'objectId',
+        'mutations': 'string',
+        'quantity': 'int',
+    },
+    primaryKey: '_id',
+};
+
+const ResultSchema = {
+    name: 'Result',
+    properties: {
+        _id: 'objectId',
+        task: 'string?',
+        mean_squared: 'double?',
+        math_expectation: 'double?',
+        coeff_variation: 'double?',
+        mode: 'int?',
+        max: 'int?',
+        min: 'int?',
+        distribution: 'DistributionValue[]',
+    },
+    primaryKey: '_id',
+};
+
+
+//
+// const DistributionSchema = {
+//     name: 'Distribution',
+//     properties: {
+//         _id: 'int',
+//         task: 'string?',
+//         distribution: 'object?',
+//         result: {
+//             ref: ResultSchema,
+//             foreign_key: "_id",
+//             is_list: false
+//         }
+//     },
+//     primaryKey: '_id',
+// };
+
 async function load_from_json(rlm){
   var all_dnks_json = JSON.parse(fs.readFileSync('complete2.json', 'utf8'));
    rlm.write(() => {
@@ -56,33 +97,10 @@ async function load_from_json(rlm){
 const realm_open = async () => {
     let realm = await Realm.open({
         path: "myrealm",
-        schema: [TaskSchema, DNKSchema],
+        schema: [DNKSchema, ResultSchema, DistributionValueSchema, MainTask],
     })
     //await load_from_json(realm)
 
-    // let task1, task2;
-    //  realm.write(() => {
-    //    all_dnks_json.map((obj, i) => {
-    //       realm.create(DNKSchema.name, {
-    //         _id: i,
-    //         ...obj
-    //       });
-    //    })
-    //  })
-
-    // realm.write(() => {
-    //   task1 = realm.create("Task", {
-    //     _id: 1,
-    //     name: "go grocery shopping",
-    //     status: "Open",
-    //   });
-    //   task2 = realm.create("Task", {
-    //     _id: 2,
-    //     name: "go exercise",
-    //     status: "Open",
-    //   });
-    //   console.log(`created two tasks: ${task1.name} & ${task2.name}`);
-    // });
     const hamming = (str1, str2) => {
         let i = 0, count = 0;
         while (i < str1.length) {
@@ -198,34 +216,54 @@ const realm_open = async () => {
         return res
     }
 
-
-    const log_rozpodil = (hamming_rozpodil) => {
+    const log_rozpodil = (hamming_rozpodil, task_name) => {
         const rozpodil_array = objToArrayRozpodil(hamming_rozpodil)
-        console.log(`Мат.сподів. ${calc_Expectation(rozpodil_array)}`)
-        console.log(`Сер. кв выдхил ${getStandardDeviation(rozpodil_array)}`)
-        console.log(`мода ${mode(rozpodil_array)}`)
+        const data = {
+            distribution: Object.keys(hamming_rozpodil).map((key) => ({'_id': bson.ObjectId(), 'mutations': key, 'quantity': hamming_rozpodil[key]})),
+            mean_squared : getStandardDeviation(rozpodil_array),
+            math_expectation : calc_Expectation(rozpodil_array),
+            mode : mode(rozpodil_array),
+            min : Math.min(...Object.values(hamming_rozpodil)),
+            max : Math.max(...Object.values(hamming_rozpodil)),
+            coeff_variation: coefficientOfVariation(rozpodil_array),
+            task: task_name
+        }
+        console.log(`Мат.сподів. ${data.math_expectation}`)
+        console.log(`Сер. кв выдхил ${data.mean_squared}`)
+        console.log(`мода ${data.mode}`)
         //console.log(`LENGTH: ${rozpodil_array.length}`)
-        // console.log(`min ${Math.min(...rozpodil_array)}`)
-        // console.log(`max ${Math.max(...rozpodil_array)}`)
-        console.log(`Coefficient of variation ${coefficientOfVariation(rozpodil_array)}`)
+        console.log(`min ${data.min}`)
+        console.log(`max ${data.max}`)
+        console.log(`Coefficient of variation ${data.coeff_variation}`)
+        let result
+        realm.write(() => {
+          result = realm.create(ResultSchema.name, {_id: bson.ObjectId(), ...data})
+        });
+        // u
+        return result
     }
 
-    const log_all_data = (filtered) => {
+    const log_all_data = (filtered, main_task_name) => {
+        let results = []
+        console.log('_____________________________________________________________________________________________')
+        console.log(main_task_name)
+        //console.log(JSON.stringify(filtered))
         console.log('===================================')
-        console.log('Розподіл відносно базової rCRS')
+        let subtask = 'Розподіл відносно базової rCRS'
+        console.log(subtask)
         let rozpodil_rcrs = hammingRes(base_dna, filtered)
         console.log(JSON.stringify(rozpodil_rcrs))
-        log_rozpodil(rozpodil_rcrs)
+        results.push(log_rozpodil(rozpodil_rcrs))
 
         console.log('===================================')
-        console.log('Розподіл відносно базової RSRS')
+        subtask = 'Розподіл відносно базової RSRS'
+        console.log(subtask)
         let rozpodil_rsrs = hammingRes(base_dna_eva, filtered)
-        console.log(JSON.stringify(rozpodil_rsrs))
-        log_rozpodil(rozpodil_rsrs)
-
+        results.push(log_rozpodil(rozpodil_rsrs))
 
         console.log('===================================')
-        console.log('Розподіл відносно дикого типу')
+        subtask = 'Розподіл відносно дикого типу'
+        console.log(subtask)
         let wild_type = wild_type_calculate(filtered)
         console.log('ДИКИЙ ТИП: ')
         console.log(wild_type)
@@ -233,21 +271,118 @@ const realm_open = async () => {
         console.log(`Відстань до RSRS ${hamming(wild_type, base_dna_eva)}`)
         let rozpodil_wild_type = hammingRes(wild_type, filtered)
         console.log(JSON.stringify(rozpodil_wild_type))
-        log_rozpodil(rozpodil_wild_type)
+        results.push(log_rozpodil(rozpodil_wild_type))
 
         console.log('===================================')
-        console.log('Розподіл відносно попарних')
+        subtask = 'Розподіл відносно попарних'
+        console.log(subtask)
         let rozpodil_paired = paired_distances(filtered)
         console.log(JSON.stringify(rozpodil_paired))
-        log_rozpodil(rozpodil_paired)
+        results.push(log_rozpodil(rozpodil_paired))
+
+        let main_task
+        realm.write(() => {
+          main_task = realm.create(MainTask.name, {_id: bson.ObjectId(), name: main_task_name, results: results})
+        });
     }
+    console.log(JSON.stringify(realm.objects("MainTask")[0]))
+    // //1
+    // var startTime = performance.now()
+    // let data = dnks.filtered('country_short = "UKR"')
+    // log_all_data(data, 'UKR')
+    // var endTime = performance.now()
+    // console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
+    //
+    // //2
+    // startTime = performance.now()
+    // data = dnks.filtered( 'code BEGINSWITH "ZA" or code BEGINSWITH "ST" or code BEGINSWITH "IF"')
+    // log_all_data(data, 'ZA" "IF')
+    // endTime = performance.now()
+    // console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
+    //
+    // //3
+    // startTime = performance.now()
+    // data = dnks.filtered( 'code BEGINSWITH "KHM" or code BEGINSWITH "RO" or code BEGINSWITH "CH" or code BEGINSWITH "KHA" or code BEGINSWITH "SU" or code BEGINSWITH "ZH" or code BEGINSWITH "BG"')
+    // log_all_data(data, '"KHM"  "RO"  "CH"  "KHA"  "SU" "ZH')
+    // endTime = performance.now()
+    // console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
+    //
+    // //4
+    // startTime = performance.now()
+    // data = dnks.filtered( 'code BEGINSWITH "BRST" or code BEGINSWITH "GML" or code BEGINSWITH "VTB"')
+    // log_all_data(data, '"BRST"  "GML" "VTB"')
+    // endTime = performance.now()
+    // console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
+    //
+    // //5
+    // startTime = performance.now()
+    // data = dnks.filtered( 'code BEGINSWITH "PNG" or code BEGINSWITH "KSTR" or code BEGINSWITH "SML" or code BEGINSWITH "BLG"')
+    // log_all_data(data, '"PNG" "KSTR" "SML"  "BLG"')
+    // endTime = performance.now()
+    // console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
+    //
+    //
+    // //6
+    // startTime = performance.now()
+    // data = dnks.filtered( 'code BEGINSWITH "SML" or code BEGINSWITH "BLG"')
+    // log_all_data(data, '"SML" "BLG"')
+    // endTime = performance.now()
+    // console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
+    //
+    // //7
+    // startTime = performance.now()
+    // data = dnks.filtered( 'code BEGINSWITH "PNG" or code BEGINSWITH "KSTR"')
+    // log_all_data(data, '"PNG" "KSTR"')
+    // endTime = performance.now()
+    // console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
+    //
+    // //11
+    // startTime = performance.now()
+    // dnks.filtered( 'code BEGINSWITH "PNG" or code BEGINSWITH "KSTR" or code BEGINSWITH "SML" or code BEGINSWITH "BLG" or code BEGINSWITH "BRST" or code BEGINSWITH "GML" or code BEGINSWITH "VTB" or country_short = "UKR"')
+    // log_all_data(data, 'UKR')
+    // endTime = performance.now()
+    // console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
+    //
+    // //12
+    // startTime = performance.now()
+    // data =  dnks.filtered( 'code BEGINSWITH "PNG" or code BEGINSWITH "KSTR" or code BEGINSWITH "SML" or code BEGINSWITH "BLG" or code BEGINSWITH "BRST" or code BEGINSWITH "GML" or code BEGINSWITH "VTB" or country_short = "UKR"')
+    // log_all_data(data, '"PNG" "KSTR" SML UKR')
+    // endTime = performance.now()
+    // console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
+    //
+    //
+    // //13
+    // startTime = performance.now()
+    // data = dnks.filtered( 'code BEGINSWITH "SML" or code BEGINSWITH "BLG" or code BEGINSWITH "BRST" or code BEGINSWITH "GML" or code BEGINSWITH "VTB" or country_short = "UKR"')
+    // log_all_data(data, '"SML" "BLG" "BRST"  "GML"  "VTB" "UKR"')
+    // endTime = performance.now()
+    // console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
 
-    let data = dnks.filtered('country_short = "UKR" and code BEGINSWITH "ZA"')
-    wild_type = wild_type_calculate(data)
-    base_rozpodil_array = objToArrayRozpodil(hammingRes(base_dna,data))
-    wild_rozpodil_array = objToArrayRozpodil(hammingRes(wild_type,data))
-    log_all_data(data)
-
+    // startTime = performance.now()
+    // data = dnks.filtered('code BEGINSWITH "ZA" OR code BEGINSWITH "ST" OR  code BEGINSWITH "IF"')
+    // log_all_data(data)
+    // endTime = performance.now()
+    // console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
+    //
+    //
+    // startTime = performance.now()
+    // data = dnks.filtered('code BEGINSWITH "KHM" OR code BEGINSWITH "RO" OR  code BEGINSWITH "CH" OR  code BEGINSWITH "KHA" OR  code BEGINSWITH "SU" OR  code BEGINSWITH "ZH" OR  code BEGINSWITH "BG"')
+    // log_all_data(data)
+    // endTime = performance.now()
+    // console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
+    //
+    //
+    //
+    // startTime = performance.now()
+    // data = dnks.filtered('code BEGINSWITH "BRST" and code BEGINSWITH "GML" and code BEGINSWITH "VTB"')
+    // endTime = performance.now()
+    // console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
+    //
+    // startTime = performance.now()
+    // data = dnks.filtered('code BEGINSWITH "PNG" and code BEGINSWITH "KSTR" and code BEGINSWITH "SML" and code BEGINSWITH "KSTR" and code BEGINSWITH "BLG" ')
+    // log_all_data(data)
+    // endTime = performance.now()
+    // console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
 }
 
 

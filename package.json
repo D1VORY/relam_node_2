@@ -13,5 +13,8 @@
     "ejs": "^3.1.7",
     "express": "^4.18.1",
     "realm": "^10.17.0"
+  },
+  "devDependencies": {
+    "bson": "^4.6.3"
   }
 }
