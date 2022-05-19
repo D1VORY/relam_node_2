@@ -6,7 +6,7 @@ const { performance } = require('perf_hooks');
 
 const objToArrayRozpodil = (obj) => Object.keys(obj).reduce((acc, key) => [...acc, ...new Array(obj[key]).fill(parseInt(key))], []);
 
-const base_dna = 'TTCTTTCATGGGGAAGCAGATTTGGGTACCACCCAAGTATTGACTCACCCATCAACAACCGCTATGTATTTCGTACATTACTGCCAGCCACCATGAATATTGTACGGTACCATAAATACTTGACCACCTGTAGTACATAAAAACCCAATCCACATCAAAACCCCCTCCCCATGCTTACAAGCAAGTACAGCAATCAACCCTCAACTATCACACATCAACTGCAACTCCAAAGCCACCCCTCACCCACTAGGATACCAACAAACCTACCCACCCTTAACAGTACATAGTACATAAAGCCATTTACCGTACATAGCACATTACAGTCAAATCCCTTCTCGCCCCCATGGATGACCCCCCTCAGATAGGGGTCCCTTGAC'
+const base_dna = 'TTCTTTCATGGGGAAGCAGATTTGGGTACCACCCAAGTATTGACTCACCCATCAACAACCGCTATGTATTTCGTACATTACTGCCAGCCACCATGAATATTGTACGGTACCATAAATACTTGACCACCTGTAGTACATAAAAACCCAATCCACATCAAAACCCCCTCCCCATGCTTACAAGCAAGTACAGCAATCAACCCTCAACTATCACACATCAACTGCAACTCCAAAGCCACCCCTCACCCACTAGGATACCAACAAACCTACCCACCCTTAACAGTACATAGTACATAAAGCCATTTACCGTACATAGCACATTACAGTCAAATCCCTTCTCGTCCCCATGGATGACCCCCCTCAGATAGGGGTCCCTTGAC'
 const base_dna_eva = 'TTCTTTCATGGGGAAGCAGATTTGGGTACCACCCAAGTATTGACTCACCCATCAACAACCGCTATGTATTTCGTACATTACTGCCAGCCACCATGAATATTGTACAGTACCATAAATACTTGACCACCTGTAGTACATAAAAACCCAATCCACATCAAAACCCTCCCCCCATGCTTACAAGCAAGTACAGCAATCAACCTTCAACTGTCACACATCAACTGCAACTCCAAAGCCACCCCTCACCCACTAGGATATCAACAAACCTACCCACCCTTAACAGTACATAGCACATAAAGCCATTTACCGTACATAGCACATTACAGTCAAATCCCTTCTCGTCCCCATGGATGACCCCCCTCAGATAGGGGTCCCTTGAC'
 
 
@@ -65,7 +65,7 @@ const ResultSchema = {
 };
 
 async function load_from_json(rlm){
-  var all_dnks_json = JSON.parse(fs.readFileSync('complete2.json', 'utf8'));
+  var all_dnks_json = JSON.parse(fs.readFileSync('result1.json', 'utf8'));
    rlm.write(() => {
      all_dnks_json.map((obj, i) => {
         rlm.create(DNKSchema.name, {
@@ -192,7 +192,7 @@ const realm_open = async () => {
             }
             res += getMax(temp)
         }
-        return res
+        return res.replace('n', '');
     }
 
     const log_rozpodil = (hamming_rozpodil, task_name) => {
@@ -225,6 +225,7 @@ const realm_open = async () => {
     const log_all_data = (filtered, main_task_name) => {
         let results = []
         console.log('_____________________________________________________________________________________________')
+        console.log(`COUNT ${filtered.length}`)
         console.log(main_task_name)
         //console.log(JSON.stringify(filtered))
         console.log('===================================')
@@ -238,6 +239,7 @@ const realm_open = async () => {
         subtask = 'Розподіл відносно базової RSRS'
         console.log(subtask)
         let rozpodil_rsrs = hammingRes(base_dna_eva, filtered)
+        console.log(JSON.stringify(rozpodil_rsrs))
         results.push(log_rozpodil(rozpodil_rsrs))
 
         console.log('===================================')
@@ -265,19 +267,19 @@ const realm_open = async () => {
         });
     }
     const dnks = realm.objects("DNK");
-    //1
-    var startTime = performance.now()
-    let data = dnks.filtered('country_short = "UKR"')
-    log_all_data(data, 'UKR')
-    var endTime = performance.now()
-    console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
+    // //1
+    // var startTime = performance.now()
+    // let data = dnks.filtered('country_short = "UKR"')
+    // log_all_data(data, 'UKR')
+    // var endTime = performance.now()
+    // console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
 
-    //2
-    startTime = performance.now()
-    data = dnks.filtered( 'code BEGINSWITH "ZA" or code BEGINSWITH "ST" or code BEGINSWITH "IF"')
-    log_all_data(data, 'ZA" "IF')
-    endTime = performance.now()
-    console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
+    // //2
+    // startTime = performance.now()
+    // data = dnks.filtered( 'code BEGINSWITH "ZA" or code BEGINSWITH "ST" or code BEGINSWITH "IF"')
+    // log_all_data(data, 'ZA" "IF')
+    // endTime = performance.now()
+    // console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
 
     //3
     startTime = performance.now()
@@ -287,81 +289,81 @@ const realm_open = async () => {
     console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
 
     //4
-    startTime = performance.now()
-    data = dnks.filtered( 'code BEGINSWITH "BRST" or code BEGINSWITH "GML" or code BEGINSWITH "VTB"')
-    log_all_data(data, '"BRST"  "GML" "VTB"')
-    endTime = performance.now()
-    console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
+    // startTime = performance.now()
+    // data = dnks.filtered( 'code BEGINSWITH "BRST" or code BEGINSWITH "GML" or code BEGINSWITH "VTB"')
+    // log_all_data(data, '"BRST"  "GML" "VTB"')
+    // endTime = performance.now()
+    // console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
 
-    //5
-    startTime = performance.now()
-    data = dnks.filtered( 'code BEGINSWITH "PNG" or code BEGINSWITH "KSTR" or code BEGINSWITH "SML" or code BEGINSWITH "BLG"')
-    log_all_data(data, '"PNG" "KSTR" "SML"  "BLG"')
-    endTime = performance.now()
-    console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
+    // //5
+    // startTime = performance.now()
+    // data = dnks.filtered( 'code BEGINSWITH "PNG" or code BEGINSWITH "KSTR" or code BEGINSWITH "SML" or code BEGINSWITH "BLG"')
+    // log_all_data(data, '"PNG" "KSTR" "SML"  "BLG"')
+    // endTime = performance.now()
+    // console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
 
+    //
+    // //6
+    // startTime = performance.now()
+    // data = dnks.filtered( 'code BEGINSWITH "SML" or code BEGINSWITH "BLG"')
+    // log_all_data(data, '"SML" "BLG"')
+    // endTime = performance.now()
+    // console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
+    //
+    // //7
+    // startTime = performance.now()
+    // data = dnks.filtered( 'code BEGINSWITH "PNG" or code BEGINSWITH "KSTR"')
+    // log_all_data(data, '"PNG" "KSTR"')
+    // endTime = performance.now()
+    // console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
+    //
+    // //11
+    // startTime = performance.now()
+    // dnks.filtered( 'code BEGINSWITH "PNG" or code BEGINSWITH "KSTR" or code BEGINSWITH "SML" or code BEGINSWITH "BLG" or code BEGINSWITH "BRST" or code BEGINSWITH "GML" or code BEGINSWITH "VTB" or country_short = "UKR"')
+    // log_all_data(data, 'UKR')
+    // endTime = performance.now()
+    // console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
+    //
+    // //12
+    // startTime = performance.now()
+    // data =  dnks.filtered( 'code BEGINSWITH "PNG" or code BEGINSWITH "KSTR" or code BEGINSWITH "SML" or code BEGINSWITH "BLG" or code BEGINSWITH "BRST" or code BEGINSWITH "GML" or code BEGINSWITH "VTB" or country_short = "UKR"')
+    // log_all_data(data, '"PNG" "KSTR" SML UKR')
+    // endTime = performance.now()
+    // console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
+    //
+    //
+    // //13
+    // startTime = performance.now()
+    // data = dnks.filtered( 'code BEGINSWITH "SML" or code BEGINSWITH "BLG" or code BEGINSWITH "BRST" or code BEGINSWITH "GML" or code BEGINSWITH "VTB" or country_short = "UKR"')
+    // log_all_data(data, '"SML" "BLG" "BRST"  "GML"  "VTB" "UKR"')
+    // endTime = performance.now()
+    // console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
 
-    //6
-    startTime = performance.now()
-    data = dnks.filtered( 'code BEGINSWITH "SML" or code BEGINSWITH "BLG"')
-    log_all_data(data, '"SML" "BLG"')
-    endTime = performance.now()
-    console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
-
-    //7
-    startTime = performance.now()
-    data = dnks.filtered( 'code BEGINSWITH "PNG" or code BEGINSWITH "KSTR"')
-    log_all_data(data, '"PNG" "KSTR"')
-    endTime = performance.now()
-    console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
-
-    //11
-    startTime = performance.now()
-    dnks.filtered( 'code BEGINSWITH "PNG" or code BEGINSWITH "KSTR" or code BEGINSWITH "SML" or code BEGINSWITH "BLG" or code BEGINSWITH "BRST" or code BEGINSWITH "GML" or code BEGINSWITH "VTB" or country_short = "UKR"')
-    log_all_data(data, 'UKR')
-    endTime = performance.now()
-    console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
-
-    //12
-    startTime = performance.now()
-    data =  dnks.filtered( 'code BEGINSWITH "PNG" or code BEGINSWITH "KSTR" or code BEGINSWITH "SML" or code BEGINSWITH "BLG" or code BEGINSWITH "BRST" or code BEGINSWITH "GML" or code BEGINSWITH "VTB" or country_short = "UKR"')
-    log_all_data(data, '"PNG" "KSTR" SML UKR')
-    endTime = performance.now()
-    console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
-
-
-    //13
-    startTime = performance.now()
-    data = dnks.filtered( 'code BEGINSWITH "SML" or code BEGINSWITH "BLG" or code BEGINSWITH "BRST" or code BEGINSWITH "GML" or code BEGINSWITH "VTB" or country_short = "UKR"')
-    log_all_data(data, '"SML" "BLG" "BRST"  "GML"  "VTB" "UKR"')
-    endTime = performance.now()
-    console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
-
-    startTime = performance.now()
-    data = dnks.filtered('code BEGINSWITH "ZA" OR code BEGINSWITH "ST" OR  code BEGINSWITH "IF"')
-    log_all_data(data)
-    endTime = performance.now()
-    console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
-
-
-    startTime = performance.now()
-    data = dnks.filtered('code BEGINSWITH "KHM" OR code BEGINSWITH "RO" OR  code BEGINSWITH "CH" OR  code BEGINSWITH "KHA" OR  code BEGINSWITH "SU" OR  code BEGINSWITH "ZH" OR  code BEGINSWITH "BG"')
-    log_all_data(data)
-    endTime = performance.now()
-    console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
-
-
-
-    startTime = performance.now()
-    data = dnks.filtered('code BEGINSWITH "BRST" and code BEGINSWITH "GML" and code BEGINSWITH "VTB"')
-    endTime = performance.now()
-    console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
-
-    startTime = performance.now()
-    data = dnks.filtered('code BEGINSWITH "PNG" and code BEGINSWITH "KSTR" and code BEGINSWITH "SML" and code BEGINSWITH "KSTR" and code BEGINSWITH "BLG" ')
-    log_all_data(data)
-    endTime = performance.now()
-    console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
+    // startTime = performance.now()
+    // data = dnks.filtered('code BEGINSWITH "ZA" OR code BEGINSWITH "ST" OR  code BEGINSWITH "IF"')
+    // log_all_data(data)
+    // endTime = performance.now()
+    // console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
+    //
+    //
+    // startTime = performance.now()
+    // data = dnks.filtered('code BEGINSWITH "KHM" OR code BEGINSWITH "RO" OR  code BEGINSWITH "CH" OR  code BEGINSWITH "KHA" OR  code BEGINSWITH "SU" OR  code BEGINSWITH "ZH" OR  code BEGINSWITH "BG"')
+    // log_all_data(data)
+    // endTime = performance.now()
+    // console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
+    //
+    //
+    //
+    // startTime = performance.now()
+    // data = dnks.filtered('code BEGINSWITH "BRST" and code BEGINSWITH "GML" and code BEGINSWITH "VTB"')
+    // endTime = performance.now()
+    // console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
+    //
+    // startTime = performance.now()
+    // data = dnks.filtered('code BEGINSWITH "PNG" and code BEGINSWITH "KSTR" and code BEGINSWITH "SML" and code BEGINSWITH "KSTR" and code BEGINSWITH "BLG" ')
+    // log_all_data(data)
+    // endTime = performance.now()
+    // console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
 }
 
 
